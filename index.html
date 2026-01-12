@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>吴文化基因库</title>
+  <style>
+    :root{
+      --bg0:#B5BCC4;
+      --bg1:#A6ADB5;
+      --card:#F5F7FA;
+      --text:#2C3E50;
+      --muted:rgba(44,62,80,.70);
+      --muted2:rgba(44,62,80,.50);
+      --line:rgba(44,62,80,.12);
+      --accent:#4A90E2;
+      --accent2:#50C878;
+      --shadow:0 12px 32px rgba(44,62,80,.10);
+      --radius:16px;
+      color-scheme:light;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: "Songti SC", "Noto Serif SC", "STSong", "SimSun", ui-serif, serif;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 800px at 15% 10%, rgba(74,144,226,.06), transparent 60%),
+        radial-gradient(800px 600px at 85% 20%, rgba(80,200,120,.05), transparent 65%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
+
+    a{ color:inherit; }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+      padding:22px 18px 28px;
+      gap:18px;
+      max-width:1120px;
+      margin:0 auto;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:240px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:24px;
+      letter-spacing:.08em;
+      font-weight:600;
+    }
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+      max-width:60ch;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.8);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:14px;
+      transition: all .2s ease;
+      user-select:none;
+      box-shadow: 0 2px 6px rgba(0,0,0,.02);
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background:#fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,.06);
+    }
+    .btn:active{ transform: translateY(0); }
+
+    main{
+      display:block;
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.45);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      backdrop-filter: blur(12px);
+    }
+
+    .page-mark{
+      position:fixed;
+      right:14px;
+      bottom:10px;
+      font-size:12px;
+      color:#fff;
+      letter-spacing:.08em;
+      pointer-events:none;
+    }
+
+    .map{
+      min-height:560px;
+      padding:20px;
+    }
+
+    .map-stage{
+      border-radius:16px;
+      border:1px solid rgba(44,62,80,.05);
+      background:
+        radial-gradient(700px 480px at 32% 22%, rgba(80,200,120,.04), transparent 65%),
+        radial-gradient(600px 460px at 72% 40%, rgba(74,144,226,.04), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.05));
+      position:relative;
+      overflow:hidden;
+      height: 480px;
+    }
+    @media (max-width: 980px){
+      .map{ min-height:auto; }
+      .map-stage{ height: 440px; }
+    }
+
+    .map-svg{
+      position:absolute;
+      inset:0;
+      opacity:.85;
+    }
+
+    .gene{
+      position:absolute;
+      width:120px;
+      transform: translate(-50%, -50%);
+      border:1px solid rgba(255,255,255,.6);
+      background:rgba(255,255,255,.85);
+      backdrop-filter: blur(8px);
+      padding:10px 10px 9px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      box-shadow: 0 8px 24px rgba(44,62,80,.08);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .gene:hover{
+      transform: translate(-50%, -54%);
+      box-shadow: 0 12px 32px rgba(44,62,80,.12);
+      background:#fff;
+    }
+    .gene:active{ transform: translate(-50%, -50%); }
+    .gene .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(74,144,226,.15);
+      flex:0 0 auto;
+    }
+    .gene .txt{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .gene .name{
+      font-size:14px;
+      letter-spacing:.08em;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      color:var(--text);
+      font-weight:600;
+    }
+    .gene .sub{
+      margin:0;
+      font-size:11px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:50;
+    }
+    .modal[aria-hidden="false"]{ display:flex; }
+    .modal .backdrop{
+      position:absolute;
+      inset:0;
+      background: rgba(242,244,246,.85);
+      backdrop-filter: blur(6px);
+    }
+    .modal .dialog{
+      position:relative;
+      width:min(980px, 100%);
+      max-height: min(84vh, 880px);
+      overflow:auto;
+      border-radius:20px;
+      border:1px solid #fff;
+      background: #fff;
+      box-shadow: 0 20px 60px rgba(44,62,80,.15);
+    }
+    .dialog header{
+      padding:18px 20px 14px;
+      border-bottom: 1px solid var(--line);
+      position:sticky;
+      top:0;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(10px);
+      z-index:2;
+    }
+    .dialog .title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .dialog .title h3{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.08em;
+      color:var(--text);
+    }
+    .dialog .title p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+    .dialog .body{
+      padding:16px 20px 20px;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:20px;
+    }
+    @media (max-width: 920px){
+      .dialog .body{ grid-template-columns: 1fr; }
+    }
+    .dialog .block{
+      border:1px solid var(--line);
+      background: #FAFBFC;
+      border-radius:16px;
+      padding:16px;
+      overflow:hidden;
+    }
+    .dialog .block h4{
+      margin:0 0 10px;
+      font-size:14px;
+      letter-spacing:.06em;
+      color:var(--text);
+      font-weight:600;
+    }
+    .dialog .analysis{
+      color:var(--muted);
+      line-height:1.85;
+      font-size:14px;
+      white-space:pre-wrap;
+      text-align:justify;
+    }
+    .gallery{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .gallery img{
+      width:100%;
+      height:160px;
+      object-fit:cover;
+      border-radius:12px;
+      border:none;
+      background: #eee;
+    }
+    .media video{
+      width:100%;
+      border-radius:12px;
+      border:none;
+      background: #000;
+      max-height: 280px;
+    }
+    .meta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--line);
+      background: #fff;
+      padding:6px 10px;
+      border-radius:999px;
+      color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>吴文化基因库</h1>
+        <p>把传统拆解为“可点击的基因”。</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="btnRandom" type="button">随机抽取一个基因</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel map" aria-label="江南抽象地图">
+        <div class="map-stage" id="mapStage">
+          <svg class="map-svg" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="water" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="rgba(74,144,226,.4)"/>
+                <stop offset="1" stop-color="rgba(80,200,120,.35)"/>
+              </linearGradient>
+              <filter id="inkBlur" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="blur"/>
+                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise"/>
+                <feDisplacementMap in="blur" in2="noise" scale="6" result="displaced"/>
+                <feMerge>
+                  <feMergeNode in="displaced"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <path d="M-20,200 C130,110 220,140 330,260 C430,370 520,360 610,250 C710,120 820,120 1040,190"
+                  fill="none" stroke="url(#water)" stroke-width="12" opacity=".4" filter="url(#inkBlur)"/>
+            <path d="M-20,420 C120,520 200,540 330,470 C470,395 600,410 720,520 C840,630 920,610 1040,520"
+                  fill="none" stroke="url(#water)" stroke-width="14" opacity=".3" filter="url(#inkBlur)"/>
+            <path d="M160,0 C240,110 240,170 140,250 C50,320 60,420 190,470 C320,520 420,560 480,700"
+                  fill="none" stroke="url(#water)" stroke-width="8" opacity=".25"/>
+            <path d="M720,0 C650,140 660,220 770,320 C870,410 860,520 720,610 C610,680 520,700 420,700"
+                  fill="none" stroke="url(#water)" stroke-width="8" opacity=".2"/>
+
+            <path d="M420,170 C510,120 630,140 720,200" fill="none" stroke="rgba(44,62,80,.15)" stroke-width="1.5" stroke-dasharray="4 8" opacity=".5"/>
+            <path d="M300,360 C410,320 500,320 610,360" fill="none" stroke="rgba(44,62,80,.12)" stroke-width="1.5" stroke-dasharray="4 8" opacity=".4"/>
+
+            <circle cx="280" cy="210" r="72" fill="rgba(74,144,226,.04)" stroke="rgba(74,144,226,.1)"/>
+            <circle cx="705" cy="250" r="84" fill="rgba(80,200,120,.03)" stroke="rgba(80,200,120,.1)"/>
+            <circle cx="520" cy="510" r="102" fill="rgba(74,144,226,.03)" stroke="rgba(44,62,80,.05)"/>
+          </svg>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="page-mark">22120-01-zy</div>
+
+  <div class="modal" id="modal" aria-hidden="true" aria-label="基因解读弹窗" role="dialog">
+    <div class="backdrop" id="modalBackdrop"></div>
+    <div class="dialog" role="document" aria-modal="true">
+      <header>
+        <div class="title">
+          <h3 id="modalTitle">文化基因</h3>
+          <p id="modalSubtitle">深度解读 · 图像 · 短视频</p>
+        </div>
+        <div class="top-actions">
+          <button class="btn" id="btnClose" type="button">关闭</button>
+        </div>
+      </header>
+      <div class="body">
+        <section class="block">
+          <h4>深度解读</h4>
+          <div class="analysis" id="modalAnalysis"></div>
+          <div class="meta" id="modalMeta"></div>
+        </section>
+        <section class="block">
+          <h4>图片</h4>
+          <div class="gallery">
+            <img id="img1" alt="相关图片占位 1">
+            <img id="img2" alt="相关图片占位 2">
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bgm" loop preload="auto"></audio>
+
+  <script>
+    const BGM_URL = "static/" + encodeURIComponent("bgMusic.mp3");
+
+    const genes = [
+      {
+        id: "water",
+        name: "水韵",
+        sub: "水利 · 漕运 · 生活",
+        color: "#6AE4D2",
+        pos: { x: 20, y: 26 },
+        tags: ["水网", "圩田", "漕运", "生活技艺"],
+        analysis:
+          "水是吴地最底层的空间逻辑：不以“城墙”划界，而以“水系”组织生产、交通与日常。\n\n" +
+          "1) 经济层：圩田、水闸、河港把农业与手工业连接成网络，形成“家家临水、处处可达”的低成本流通。\n" +
+          "2) 社会层：水上往来让邻里关系更像连续的街巷；桥、埠头、码头既是交通节点，也是公共生活舞台。\n" +
+          "3) 审美层：水面反光、雾气与季节性涨落塑造了江南的“留白感”，影响园林、绘画与诗文语气。",
+      },
+      {
+        id: "garden",
+        name: "园境",
+        sub: "园林 · 叠石 · 借景",
+        color: "#7AA7FF",
+        pos: { x: 70, y: 30 },
+        tags: ["借景", "框景", "叠石", "移步换景"],
+        analysis:
+          "园林是把“有限空间”做成“无限叙事”的方法论：通过路径、视线与层次，把日常生活包装成可阅读的景观。\n\n" +
+          "1) 结构：曲折的动线让观看变成“逐帧展开”；每一次转折都是一次镜头切换。\n" +
+          "2) 材料：叠石并非堆砌，而是用肌理与孔隙模拟山水的时间尺度，把“远山”搬进庭院。\n" +
+          "3) 观念：借景把外部城市/自然纳入作品边界，体现吴地对“关系”的理解：景不独立，靠连结成立。",
+      },
+      {
+        id: "opera",
+        name: "曲艺",
+        sub: "昆曲 · 评弹 · 吴歌",
+        color: "#FFB86B",
+        pos: { x: 50, y: 18 },
+        tags: ["曲牌", "唱腔", "小腔", "书场"],
+        analysis:
+          "曲艺是吴文化的“声音文献”：它把语言、情感与节律封存在唱腔与曲牌里，是可以被口传复制的审美体系。\n\n" +
+          "1) 技法：以细密的行腔与节奏变化表达情绪层次，强调“含蓄而不含糊”。\n" +
+          "2) 场域：书场与戏台既是演出空间，也是信息交换与社会关系的节点。\n" +
+          "3) 语言：吴语音系的入声、连读与鼻音让旋律更贴合“软而韧”的气质，形成独特的声学辨识度。",
+      },
+      {
+        id: "craft",
+        name: "工巧",
+        sub: "苏绣 · 玉雕 · 核雕",
+        color: "#D98BFF",
+        pos: { x: 78, y: 56 },
+        tags: ["精微", "工序", "纹样", "传承"],
+        analysis:
+          "工巧体现吴地对“精微”的价值取向：把时间投入到细节里，让材料的物理限制成为审美资源。\n\n" +
+          "1) 工序：一件作品往往由多道不可逆步骤组成，每一步都需要稳定的手感与经验判断。\n" +
+          "2) 视觉：以纹样、光泽与层次建立“近看见工、远看见气”的双尺度阅读。\n" +
+          "3) 社会：工艺与市镇经济互相喂养，形成师徒、作坊、行会等组织形态，延续到今天的非遗体系。",
+      },
+      {
+        id: "literature",
+        name: "文枢",
+        sub: "藏书 · 科举 · 书画",
+        color: "#61F5A3",
+        pos: { x: 36, y: 56 },
+        tags: ["藏书楼", "书院", "科举", "文人网络"],
+        analysis:
+          "文枢是吴文化的“知识基础设施”：从藏书、讲学到书画社交，把文化生产做成可积累、可流通的系统。\n\n" +
+          "1) 制度：科举与家学把学习变成家庭长期项目，形成重教传统。\n" +
+          "2) 载体：藏书楼与刻书业让知识得以复制与扩散，支撑跨地域的学术共同体。\n" +
+          "3) 审美：书画不仅是艺术，更是身份与交往语言；它把“品味”变成一种社会信用。",
+      },
+      {
+        id: "town",
+        name: "市隐",
+        sub: "古镇 · 街巷 · 茶肆",
+        color: "#FFD36A",
+        pos: { x: 27, y: 78 },
+        tags: ["街巷肌理", "茶肆", "桥市", "小店"],
+        analysis:
+          "市隐描述的是吴地市镇的生活哲学：在繁忙的商业与安静的日常之间，保留一条“可退”的缝。\n\n" +
+          "1) 形态：窄巷、临河廊棚、小桥与小店形成紧凑的生活半径，行走即交流。\n" +
+          "2) 氛围：茶肆、书场、早点铺把公共生活切成细碎的时间片段，形成可重复的日常仪式。\n" +
+          "3) 价值：不追求宏大场面，而追求可持续的舒适度与人情密度。",
+      },
+      {
+        id: "seasonal",
+        name: "时鲜",
+        sub: "湖鲜 · 茶饮 · 节令",
+        color: "#7CE7FF",
+        pos: { x: 60, y: 72 },
+        tags: ["节令", "食材", "气候", "手作"],
+        analysis:
+          "时鲜是吴文化的时间观：以节令管理生活，把季节变化转化为味觉与习俗的日程表。\n\n" +
+          "1) 生态：水域、湿度与气候决定了食材谱系（湖鲜、菱角、蟹、茶等），形成地方性饮食结构。\n" +
+          "2) 仪式：节令把个人生活与自然节律对齐，吃什么、何时做什么，都有“合时”的标准。\n" +
+          "3) 记忆：味觉比文字更容易保存情绪，“一口当季”常常就是乡愁与归属。",
+      },
+      {
+        id: "boatbridge",
+        name: "舟桥",
+        sub: "帆影 · 拱桥 · 摆渡",
+        color: "#9BA8FF",
+        pos: { x: 86, y: 18 },
+        tags: ["桥梁", "渡口", "航路", "联通"],
+        analysis:
+          "舟桥是吴地网络的“连接器”：舟解决可变的水面交通，桥把节点固定下来，两者共同塑造空间秩序。\n\n" +
+          "1) 交通：帆影、摆渡与桥梁让水网变成道路系统，降低了移动与交易的门槛。\n" +
+          "2) 社会：桥头常是市集与社交中心，渡口是信息交换点，连接与聚集在同一处发生。\n" +
+          "3) 象征：桥也是跨越与转场的隐喻，常进入诗文、戏曲叙事与地方传说。",
+      },
+    ];
+
+    const IMAGE_MAP = {
+      "水韵": ["水韵.png", "水韵 (2).png"],
+      "园境": ["园境.png", "园境 (2).png"],
+      "曲艺": ["曲艺.png", "曲艺 (2).jpg"],
+      "工巧": ["工巧.jpg", "工巧 (2).jpg"],
+      "文枢": ["文枢.png", "文枢 (2).png"],
+      "市隐": ["市隐.png", "市隐 (2).png"],
+      "时鲜": ["时鲜.png", "时鲜 (2).png"],
+      "舟桥": ["舟桥.png", "舟桥 (2).png"],
+    };
+
+    const modal = document.getElementById("modal");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const btnClose = document.getElementById("btnClose");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalSubtitle = document.getElementById("modalSubtitle");
+    const modalAnalysis = document.getElementById("modalAnalysis");
+    const modalMeta = document.getElementById("modalMeta");
+    const img1 = document.getElementById("img1");
+    const img2 = document.getElementById("img2");
+    const bgm = document.getElementById("bgm");
+
+    const mapStage = document.getElementById("mapStage");
+
+    const state = {
+      openGeneId: null,
+      lastFocused: null,
+    };
+
+
+    function createGeneButton(gene) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "gene";
+      btn.style.left = gene.pos.x + "%";
+      btn.style.top = gene.pos.y + "%";
+      btn.dataset.geneId = gene.id;
+      btn.setAttribute("aria-label", `打开基因：${gene.name}`);
+
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = gene.color;
+      dot.style.boxShadow = `0 0 0 4px ${gene.color}2a`;
+
+      const txt = document.createElement("span");
+      txt.className = "txt";
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = gene.name;
+      const sub = document.createElement("span");
+      sub.className = "sub";
+      sub.textContent = gene.sub;
+      txt.appendChild(name);
+      txt.appendChild(sub);
+
+      btn.appendChild(dot);
+      btn.appendChild(txt);
+
+      btn.addEventListener("click", () => openGene(gene.id));
+      return btn;
+    }
+
+    function render() {
+      for (const gene of genes) {
+        mapStage.appendChild(createGeneButton(gene));
+      }
+    }
+
+    function openModal() {
+      state.lastFocused = document.activeElement;
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      btnClose.focus();
+    }
+
+    function closeModal() {
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      state.openGeneId = null;
+      bgm.pause();
+      bgm.currentTime = 0;
+      if (state.lastFocused && typeof state.lastFocused.focus === "function") {
+        state.lastFocused.focus();
+      }
+    }
+
+    function openGene(geneId) {
+      const gene = genes.find(g => g.id === geneId);
+      if (!gene) return;
+
+      state.openGeneId = geneId;
+      modalTitle.textContent = gene.name;
+      modalSubtitle.textContent = gene.sub;
+      modalAnalysis.textContent = gene.analysis;
+
+      const base = "static/";
+      const [mainFile, altFile] = IMAGE_MAP[gene.name] || [gene.name + ".png", gene.name + " (2).png"];
+      img1.src = base + encodeURIComponent(mainFile);
+      img2.src = base + encodeURIComponent(altFile);
+
+      modalMeta.innerHTML = "";
+      for (const t of gene.tags) {
+        const el = document.createElement("span");
+        el.className = "pill";
+        el.textContent = t;
+        modalMeta.appendChild(el);
+      }
+
+      openModal();
+      
+      bgm.src = BGM_URL;
+      bgm.play().catch(e => console.warn("Background music autoplay blocked:", e));
+    }
+
+    document.getElementById("btnRandom").addEventListener("click", () => {
+      const gene = genes[Math.floor(Math.random() * genes.length)];
+      openGene(gene.id);
+    });
+
+    btnClose.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", closeModal);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") {
+        e.preventDefault();
+        closeModal();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
